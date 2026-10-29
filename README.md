@@ -112,3 +112,7 @@ go build ./...
 本项目使用 MIT 许可证，见 `LICENSE`。Go 运行时依赖的许可证与声明见 `THIRD_PARTY_LICENSES.md`。
 
 容器镜像基于 Alpine Linux，系统组件及其许可信息见 [Alpine 软件包索引](https://pkgs.alpinelinux.org/packages)。镜像包含的 `GPL-2.0.txt` 为相关组件的许可证文本；本项目未附带 Alpine 组件源码。
+
+## 发布
+
+推送以 `v` 开头且符合 Docker 镜像标签格式的版本标签（例如 `v0.1.0`）后，GitHub Actions 会先运行验证，再构建并发布 Linux amd64 和 arm64 镜像到 `ghcr.io/futuretea/vsphere-proxy:<版本标签>`，最后创建 GitHub Release。
