@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: vsphere-proxy
+  tag: dev
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+targets: {}
+existingSecrets: []
+existingCaConfigMap: ""

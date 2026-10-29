@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vsphere-proxy.name" . }}
+  labels:
+    {{- include "vsphere-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vsphere-proxy.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vsphere-proxy.labels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: vsphere-proxy
+          image: {{ printf "%s:%s" .Values.image.repository (.Values.image.tag | toString) | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          {{- if .Values.existingSecrets }}
+          envFrom:
+            {{- range .Values.existingSecrets }}
+            - secretRef:
+                name: {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.existingCaConfigMap }}
+          env:
+            - name: SSL_CERT_FILE
+              value: /etc/vsphere-proxy/ca/ca.crt
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vsphere-proxy/config.json
+              subPath: config.json
+              readOnly: true
+            {{- if .Values.existingCaConfigMap }}
+            - name: ca
+              mountPath: /etc/vsphere-proxy/ca
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "vsphere-proxy.name" . }}
+        {{- if .Values.existingCaConfigMap }}
+        - name: ca
+          configMap:
+            name: {{ .Values.existingCaConfigMap | quote }}
+        {{- end }}

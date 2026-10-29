@@ -1,0 +1,22 @@
+{{- $targets := dict -}}
+{{- range $name, $target := .Values.targets -}}
+{{- range $field := keys $target -}}
+{{- if not (has $field (list "endpoint" "username_env" "password_env" "insecure")) -}}
+{{- fail "target contains an unsupported field" -}}
+{{- end -}}
+{{- end -}}
+{{- $endpoint := get $target "endpoint" | default "" -}}
+{{- if not (regexMatch `(?i)^https://([^:/@?#%]+|\[[0-9a-f:.]+(%25[a-z0-9_.~-]+)?\])(:[0-9]*)?(/[^?#]*)?$` $endpoint) -}}
+{{- fail "target endpoint must be an HTTPS address without credentials, query or fragment" -}}
+{{- end -}}
+{{- $_ := set $targets $name (dict "endpoint" $endpoint "username_env" (get $target "username_env") "password_env" (get $target "password_env") "insecure" (get $target "insecure" | default false)) -}}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vsphere-proxy.name" . }}
+  labels:
+    {{- include "vsphere-proxy.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {{- dict "listen" "0.0.0.0:8080" "targets" $targets | toPrettyJson | nindent 4 }}

@@ -1,0 +1,4 @@
+/config.json
+/values-local.yaml
+.env
+.env.*

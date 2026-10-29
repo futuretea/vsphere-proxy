@@ -1,0 +1,9 @@
+.git
+.project
+.github
+.env
+.env.*
+*.pem
+*.key
+config.json
+bin

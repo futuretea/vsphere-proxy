@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vsphere-proxy
+description: Read-only multi-target vSphere proxy
+type: application
+version: 0.1.0
+appVersion: "dev"
